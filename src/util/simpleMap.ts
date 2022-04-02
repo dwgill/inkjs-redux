@@ -3,8 +3,6 @@ import { objHas } from "./objHas";
 
 type Key = string | number;
 
-const LARGE_NUM_ENTRIES = 200;
-
 export interface SimpleMap<V> {
   readonly size: number;
   readonly entries: {
@@ -42,7 +40,7 @@ export function set<V>(
   map ??= emptyMap;
   const alreadyHad = has(map, key);
   if (value === undefined) {
-    if (alreadyHad) return map;
+    if (!alreadyHad) return map;
     const newEntries = { ...map.entries };
     delete newEntries[key];
     return {
@@ -50,6 +48,9 @@ export function set<V>(
       size: size(map) - 1,
     };
   } else {
+    if (alreadyHad && map.entries[key] === value) {
+      return map;
+    }
     return {
       entries: {
         ...map.entries,
@@ -77,20 +78,29 @@ export function setMany<V>(
   map ??= emptyMap;
   const newEntries = { ...map.entries };
   let newSize = size(map);
+  let actuallyChanged = false;
   for (const [key, value] of entries) {
     if (value === undefined) {
-      if (has(map, key)) {
+      if (objHas(newEntries, key)) {
         newSize -= 1;
         delete newEntries[key];
+        actuallyChanged = true;
       }
     } else {
-      if (has(map, key)) {
+      if (!objHas(newEntries, key)) {
         newSize += 1;
+        newEntries[key] = value;
+        actuallyChanged = true;
+      } else if (objHas(newEntries, key) && newEntries[key] !== value) {
+        newEntries[key] = value;
+        actuallyChanged = true;
       }
-      newEntries[key] = value;
     }
   }
 
+  if (!actuallyChanged) {
+    return map;
+  }
   return {
     entries: newEntries,
     size: newSize,
@@ -98,39 +108,26 @@ export function setMany<V>(
 }
 
 export function remove<V>(
-  set: SimpleMap<V> | null | undefined,
+  map: SimpleMap<V> | null | undefined,
   ...keys: Key[]
 ): SimpleMap<V> {
-  set ??= emptyMap;
-  if (keys.length === 0 || size(set) === 0) {
-    return set;
+  map ??= emptyMap;
+  if (keys.length === 0 || size(map) === 0) {
+    return emptyMap;
   }
 
-  if (keys.length < LARGE_NUM_ENTRIES) {
-    // If we're adding just a few values, we can afford to check if the values
-    // are all already absent from the set.
-    let allAlreadyAbsent = true;
-    for (const key of keys) {
-      if (has(set, key)) {
-        allAlreadyAbsent = false;
-        break;
-      }
-    }
-    if (allAlreadyAbsent) {
-      return set;
-    }
-  }
-
-  const entries: Record<Key, V> = { ...set.entries };
-  let newSize = size(set);
+  const newEntries: Record<Key, V> = { ...map.entries };
+  let newSize = size(map);
   for (const key of keys) {
-    if (objHas(entries, key)) {
+    if (objHas(newEntries, key)) {
       newSize -= 1;
-      delete entries[key];
+      delete newEntries[key];
     }
   }
+  if (newSize === 0) return emptyMap;
+  if (newSize === size(map)) return map;
   return {
-    entries,
+    entries: newEntries,
     size: newSize,
   };
 }

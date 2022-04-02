@@ -17,12 +17,15 @@
     "redux": "^4.1.2"
   },
   "devDependencies": {
+    "@types/jest": "^27.4.1",
     "@types/nanoid": "^3.0.0",
     "inkjs": "^2.0.0",
+    "jest": "^27.5.1",
     "prettier": "^2.6.1",
     "redux": "^4.1.2",
     "rollup": "^2.70.1",
     "rollup-plugin-typescript2": "^0.31.2",
+    "ts-jest": "^27.1.4",
     "typescript": "^4.6.3"
   },
   "dependencies": {

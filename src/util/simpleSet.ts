@@ -24,8 +24,9 @@ export function overlaps(
 ) {
   set1 ??= emptySet;
   set2 ??= emptySet;
-  for (const value of values(set1)) {
-    if (has(set2, value)) {
+  let [smaller, larger] = size(set1) < size(set2) ? [set1, set2] : [set2, set1];
+  for (const value of values(smaller)) {
+    if (has(larger, value)) {
       return true;
     }
   }
