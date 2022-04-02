@@ -1,0 +1,34 @@
+{
+  "name": "inkjs-redux",
+  "version": "1.0.0",
+  "license": "MIT",
+  "description": "Redux toolkit bindings for inkjs",
+  "main": "lib/index.js",
+  "module": "lib/index.esm.js",
+  "scripts": {
+    "prebuild": "rm -rf ./lib",
+    "build": "rollup -c",
+    "prettier": "prettier --write .",
+    "test": "jest",
+    "test-watch": "jest --watch"
+  },
+  "peerDependencies": {
+    "inkjs": "^2.0.0",
+    "redux": "^4.1.2"
+  },
+  "devDependencies": {
+    "@types/nanoid": "^3.0.0",
+    "inkjs": "^2.0.0",
+    "prettier": "^2.6.1",
+    "redux": "^4.1.2",
+    "rollup": "^2.70.1",
+    "rollup-plugin-typescript2": "^0.31.2",
+    "typescript": "^4.6.3"
+  },
+  "dependencies": {
+    "husky": "^7.0.4",
+    "lint-staged": "^12.3.7",
+    "nanoid": "^3.3.2",
+    "rollup-plugin-typescript": "^1.0.1"
+  }
+}
