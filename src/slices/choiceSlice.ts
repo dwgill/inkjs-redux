@@ -1,7 +1,7 @@
 import { AnyAction } from "redux";
 import { action } from "../actions";
 import { SomePartial } from "../util/types";
-import { nanoid } from "nanoid";
+import { nanoid } from "nanoid/non-secure";
 import { storyActions } from "../storyActions";
 import * as simpleMap from "../util/simpleMap";
 
@@ -31,7 +31,7 @@ export const choiceActions = {
       if (newChoices.some((choice) => !choice.id)) {
         newChoices = newChoices.map((choice) => {
           if (choice.id) return choice;
-          return { ...choice, id: nanoid() };
+          return { ...choice, id: `choice/${nanoid()}` };
         });
       }
       return {

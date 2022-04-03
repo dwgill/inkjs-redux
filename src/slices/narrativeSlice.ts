@@ -1,4 +1,4 @@
-import { nanoid } from "nanoid";
+import { nanoid } from "nanoid/non-secure";
 import { AnyAction } from "redux";
 import { action } from "../actions";
 import * as simpleSet from "../util/simpleSet";
@@ -69,7 +69,7 @@ export const narrativeActions = {
     ) => {
       const newNarration = { ...narration };
       if (!newNarration.id) {
-        newNarration.id = nanoid();
+        newNarration.id = `narration/${nanoid()}`;
       }
       if (newNarration.meta && simpleSet.size(newNarration.meta) === 0) {
         delete newNarration.meta;
@@ -111,10 +111,7 @@ export function narrativeReducer(
 
     return {
       ...state,
-      flatNarrationIdOrdering: [
-        ...state.flatNarrationIdOrdering,
-        narration.id,
-      ],
+      flatNarrationIdOrdering: [...state.flatNarrationIdOrdering, narration.id],
       groupedNarrationIdOrdering: incorporateNewNarrationIntoGroups(
         narration,
         state.groupedNarrationIdOrdering,
@@ -139,14 +136,10 @@ export function narrativeReducer(
 
     return {
       ...state,
-      narrationMap: simpleMap.replace(
-        state.narrationMap,
-        id,
-        (narration) => ({
-          ...narration!,
-          meta: simpleMap.setMany(narration?.meta, entries),
-        })
-      ),
+      narrationMap: simpleMap.replace(state.narrationMap, id, (narration) => ({
+        ...narration!,
+        meta: simpleMap.setMany(narration?.meta, entries),
+      })),
     };
   }
 

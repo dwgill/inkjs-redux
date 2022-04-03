@@ -71,9 +71,7 @@ describe("simpleMap", () => {
   });
   describe("set", () => {
     it("creates a new object and does not mutate the old one", () => {
-      const example1Clone: typeof example = JSON.parse(
-        JSON.stringify(example)
-      );
+      const example1Clone: typeof example = JSON.parse(JSON.stringify(example));
       const result = simpleMap.set(example, "foobar", 10);
       expect(result).not.toBe(example);
       expect(example).not.toBe(example1Clone);
@@ -87,7 +85,7 @@ describe("simpleMap", () => {
       expect(simpleMap.has(example, "foobar")).toBeFalsy();
     });
     it("doesn't update the map if the value is identical to an existing entry", () => {
-      const result = simpleMap.set(example, "foo", 'bar');
+      const result = simpleMap.set(example, "foo", "bar");
       expect(result).toEqual(example);
     });
     it("can be used to remove an entry by setting it to undefined", () => {
@@ -161,19 +159,19 @@ describe("simpleMap", () => {
       expect(simpleMap.get(result, "foo")).toEqual("barbar");
     });
     it("works w/undefined entry and defined output", () => {
-      const result = simpleMap.replace(example, 'foobar', (val) => {
+      const result = simpleMap.replace(example, "foobar", (val) => {
         expect(val).toEqual(undefined);
         return 10;
       });
-      expect(simpleMap.has(result, 'foobar')).toBeTruthy();
-      expect(simpleMap.get(result, 'foobar')).toEqual(10);
+      expect(simpleMap.has(result, "foobar")).toBeTruthy();
+      expect(simpleMap.get(result, "foobar")).toEqual(10);
     });
     it("works w/defined entry and undefined output", () => {
-      const result = simpleMap.replace(example, 'foo', () => undefined);
-      expect(simpleMap.has(result, 'foo')).toBeFalsy();
+      const result = simpleMap.replace(example, "foo", () => undefined);
+      expect(simpleMap.has(result, "foo")).toBeFalsy();
     });
     it("works w/defined entry and undefined output", () => {
-      const result = simpleMap.replace(example, 'foobar', () => undefined);
+      const result = simpleMap.replace(example, "foobar", () => undefined);
       expect(result).toBe(example);
     });
   });

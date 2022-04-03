@@ -1,4 +1,5 @@
 import typescript from "rollup-plugin-typescript2";
+import resolve from '@rollup/plugin-node-resolve';
 
 export default [
   {
@@ -7,7 +8,9 @@ export default [
       file: "./lib/index.esm.js",
       format: "esm",
     },
-    plugins: [typescript()],
+    plugins: [typescript(), resolve({
+      browser: true
+    })],
     external: ["@reduxjs/toolkit", "inkjs", "react", "react-redux"],
   },
   {
@@ -16,7 +19,9 @@ export default [
       file: "./lib/index.js",
       format: "cjs",
     },
-    plugins: [typescript()],
+    plugins: [typescript(), resolve({
+      browser: true
+    })],
     external: ["@reduxjs/toolkit", "inkjs", "react", "react-redux"],
   },
 ];

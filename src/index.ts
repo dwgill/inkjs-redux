@@ -8,7 +8,7 @@ import { narrativeActions } from "./slices/narrativeSlice";
 import { variableActions } from "./slices/variableSlice";
 import { storyActions } from "./storyActions";
 import { objEntries } from "./util/objEntries";
-import { ExternalStoryFunc } from "./util/types";
+import { DistributiveOmit, ExternalStoryFunc } from "./util/types";
 
 export { inkJsReduxReducer } from "./reducer";
 
@@ -68,7 +68,7 @@ class InkJsReduxCommon<S> {
   clearStory() {
     if (this.story == null) return;
     this.story.RemoveVariableObserver(this.variableObserver);
-    this.boundExternalFunctionNames.forEach(name => {
+    this.boundExternalFunctionNames.forEach((name) => {
       this.unbindExternalFunction(name);
     });
     this.boundExternalFunctionNames.clear();
@@ -213,7 +213,7 @@ class InkJsReduxCommon<S> {
       this.story.UnbindExternalFunction(name);
     } catch (err) {
       console.error(
-        `Encountered error unbinding external function '${name}'from story.`
+        `Encountered error unbinding external function '${name}' from story.`
       );
     }
 
@@ -229,25 +229,31 @@ class InkJsReduxCommon<S> {
       console.error(
         "Attempted to read story state to redux from from non-existant story."
       );
-      return;
+      return null;
     }
 
     const canContinue = this.story.canContinue;
-    const currentText = this.story.currentText;
+    const currentText = this.story.currentText ?? "";
     const currentTags = this.story.currentTags;
-    const currentErrors = this.story.currentErrors;
-    const currentChoices = this.story.currentChoices;
+    const currentErrors = this.story.currentErrors ?? [];
+    const currentChoices: DistributiveOmit<Choice, "id">[] =
+      this.story.currentChoices.map((cc) => ({
+        index: cc.index,
+        isInvisibleDefault: cc.isInvisibleDefault,
+        text: cc.text,
+      }));
 
     this.api.dispatch(
       narrativeActions.addNarration({
-        text: currentText ?? "",
+        text: currentText,
         tags: currentTags ?? [],
       })
     );
 
-    this.api.dispatch(miscActions.setCanContinue(canContinue));
-    this.api.dispatch(miscActions.setStoryErrors(currentErrors ?? []));
+    this.api.dispatch(miscActions.setCanContinue(!!canContinue));
+    this.api.dispatch(miscActions.setStoryErrors(currentErrors));
     this.api.dispatch(choiceActions.setChoices(currentChoices));
+
     return {
       canContinue,
       currentText,
@@ -283,7 +289,11 @@ class InkJsReduxCommon<S> {
 
 interface Handler<A extends AnyAction> {
   match(action: AnyAction): action is A;
-  run<S>(common: InkJsReduxCommon<S>, next: Dispatch<AnyAction>, action: A): void;
+  run<S>(
+    common: InkJsReduxCommon<S>,
+    next: Dispatch<AnyAction>,
+    action: A
+  ): void;
 }
 
 const createHandler = <A extends AnyAction>(handler: Handler<A>) => handler;
@@ -368,9 +378,7 @@ const handleSetStory = createHandler({
       );
     }
 
-    for (const [name, func] of objEntries(
-      config?.externalFunctions ?? {}
-    )) {
+    for (const [name, func] of objEntries(config?.externalFunctions ?? {})) {
       common.api.dispatch(
         storyActions.bindExternalFunction({
           func: func as any,
@@ -521,7 +529,7 @@ const handleChooseChoice = createHandler({
       console.error("Tried to choose choice, but there are no known chocies.");
     }
 
-    let choice: Choice| undefined;
+    let choice: Choice | undefined;
     if ("index" in action.payload) {
       const { index } = action.payload;
       choice = common.selectors.choices.selectChoiceByIndex(

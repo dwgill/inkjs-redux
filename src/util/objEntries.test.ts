@@ -3,8 +3,8 @@ import { objEntries } from "./objEntries";
 Object.defineProperty(Object, "entries", { value: "foobar" });
 
 describe("objEntries", () => {
-  it('test override works', () => {
-    expect(typeof Object.entries).not.toEqual('function');
+  it("test override works", () => {
+    expect(typeof Object.entries).not.toEqual("function");
   });
   it("works", () => {
     const result = objEntries({

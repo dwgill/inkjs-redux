@@ -23,7 +23,7 @@ export function objEntries<O extends { [key: string]: any }>(
 }
 
 export function objFromEntries<S extends string | number, T>(
-  entries: ([S, T])[]
+  entries: [S, T][]
 ): { [key in S]: T } {
   const obj: Record<any, any> = {};
   for (const [key, val] of entries) {
