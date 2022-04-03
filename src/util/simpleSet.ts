@@ -18,21 +18,6 @@ export const has = (set: SimpleSet | undefined | null, value: SetValue) => {
   return !!set && objHas(set.entries, value);
 };
 
-export function overlaps(
-  set1: SimpleSet | undefined | null,
-  set2: SimpleSet | undefined | null
-) {
-  set1 ??= emptySet;
-  set2 ??= emptySet;
-  let [smaller, larger] = size(set1) < size(set2) ? [set1, set2] : [set2, set1];
-  for (const value of values(smaller)) {
-    if (has(larger, value)) {
-      return true;
-    }
-  }
-  return false;
-}
-
 export const size = (set: SimpleSet | undefined | null) =>
   set == null ? 0 : set.size;
 
@@ -60,28 +45,20 @@ export function add(
   if (values.length === 0) {
     return set;
   }
-  if (values.length < 200) {
-    // If we're adding just a few values, we can afford to check if the values
-    // are all already present in the set.
-    let allAlreadyPresent = true;
-    for (const value of values) {
-      if (!has(set, value)) {
-        allAlreadyPresent = false;
-        break;
-      }
-    }
-    if (allAlreadyPresent) {
-      return set;
-    }
-  }
 
   const entries: Record<SetValue, true> = { ...set.entries };
   let newSize = size(set);
   for (const value of values) {
+    if (value == null) {
+      continue;
+    }
     if (!objHas(entries, value)) {
       newSize += 1;
       entries[value] = true;
     }
+  }
+  if (newSize === size(set)) {
+    return set;
   }
   return {
     entries,
@@ -97,20 +74,6 @@ export function remove(
   if (values.length === 0 || size(set) === 0) {
     return set;
   }
-  if (values.length < 200) {
-    // If we're adding just a few values, we can afford to check if the values
-    // are all already absent from the set.
-    let allAlreadyAbsent = true;
-    for (const value of values) {
-      if (has(set, value)) {
-        allAlreadyAbsent = false;
-        break;
-      }
-    }
-    if (allAlreadyAbsent) {
-      return set;
-    }
-  }
 
   const entries: Record<SetValue, true> = { ...set.entries };
   let newSize = size(set);
@@ -120,6 +83,11 @@ export function remove(
       delete entries[value];
     }
   }
+
+  if (newSize === size(set)) {
+    return set;
+  }
+
   return {
     entries,
     size: newSize,
@@ -142,20 +110,50 @@ export function insersection(
 ): SimpleSet {
   set1 ??= emptySet;
   set2 ??= emptySet;
+  let smaller: SimpleSet, larger: SimpleSet;
+  if (size(set1) < size(set2)) {
+    smaller = set1;
+    larger = set2;
+  } else {
+    smaller = set2;
+    larger = set1;
+  }
   const entries: Record<SetValue, true> = {};
-  let size = 0;
-  for (const value of values(set1)) {
-    if (has(set2, value)) {
+  let newSize = 0;
+  for (const value of values(smaller)) {
+    if (has(larger, value)) {
       entries[value] = true;
-      size += 1;
+      newSize += 1;
     }
   }
 
   return {
     entries,
-    size,
+    size: newSize,
   };
 }
 
-export const values = (set: SimpleSet | undefined | null) =>
-  set == null ? [] : Object.keys(set);
+export function overlaps(
+  set1: SimpleSet | undefined | null,
+  set2: SimpleSet | undefined | null
+) {
+  set1 ??= emptySet;
+  set2 ??= emptySet;
+  let smaller: SimpleSet, larger: SimpleSet;
+  if (size(set1) < size(set2)) {
+    smaller = set1;
+    larger = set2;
+  } else {
+    smaller = set2;
+    larger = set1;
+  }
+  for (const value of values(smaller)) {
+    if (has(larger, value)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export const values = (set: SimpleSet | undefined | null): string[] =>
+  set == null ? [] : Object.keys(set.entries);
