@@ -1,5 +1,4 @@
 import { Dispatch } from "redux";
-import { Selectors } from "../selectors";
 
 export type DistributiveOmit<T, K extends keyof T> = T extends unknown
   ? Omit<T, K>
